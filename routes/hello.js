@@ -5,6 +5,7 @@ const { NotImplemented } = require('http-errors');
 var router = express.Router();
 
 
+
 var mysql = require('mysql');
 // require('knex)({初期設定のデータ});
 var knex = require('knex')({
@@ -23,6 +24,7 @@ var MyData = Bookshelf.Model.extend({  //引数にモデルに関する設定情
   tableName: 'mydata'
 })
 const { route } = require('.');
+Bookshelf.plugin('pagination');  // fetchPage追加
 
 var mysql_setting = {
   host       : 'localhost',
@@ -178,6 +180,24 @@ router.post('/find',(req, res, next) => {
   })
   .catch((err) => {
     res.status(500).json({error: true, data: {message: err.message}});
+  });
+});
+
+router.get('/:page', (req, res, next) => {
+  var pg = req.params.page;  // /:pageに入力したパラメータを変数　pgに
+  pg *= 1;
+  if(pg < 1){ pg = 1}
+  new MyData().fetchPage({page:pg, pageSize: 3}).then((collection) => {
+    var data = {
+      title: 'Hello',
+      content: collection.toArray(),
+      pagination: collection.pagination
+    };
+    console.log(collection.pagination);
+    res.render('hello/index', data);
+  })
+  .catch((err) => {
+    res.status(500).json({error: true, data:{message: err.message}});
   });
 });
 
