@@ -8,31 +8,33 @@
 </head>
 <body>
   <head>
-    <h1><%= title %></h1>
+      <h1><%= title %></h1>
   </head>
   <div role="main">
-    <p><%= content %></p>
-    <form method="post" action="/hello/add">
-    <table>
-      <tr>
-        <th>NAME</th>
-        <td><input type="text" name="name"></td>
-      </tr>
-      <tr>
-        <th>MAIL</th>
-        <td><input type="text" name="mail"></td>
-      </tr>
-      <tr>
-        <th>AGE</th>
-        <th><input type="number" name="age"></th>
-      </tr>
-      <tr>
-        <th></th>
-        <td><input type="submit" value="作成"></td>
-      </tr>
-    </table>
-    </form>
+      <p><%- content %></p>
+      <form method="post" action="/hello/add">
+      <table>
+          <tr>
+              <th>NAME</th>
+              <td><input type="text" name="name"
+                  value="<%= form.name %>"></td>
+          </tr>
+          <tr>
+              <th>MAIL</th>
+              <td><input type="text" name="mail"
+                  value="<%= form.mail %>"></td>
+          </tr>
+          <tr>
+              <th>AGE</th>
+              <td><input type="number" name="age"
+                  value="<%= form.age %>"></td>
+          </tr>
+          <tr>
+              <th></th>
+              <td><input type="submit" value="作成"></td>
+          </tr>
+      </table>
+      </form>
   </div>
-  
 </body>
 </html>
