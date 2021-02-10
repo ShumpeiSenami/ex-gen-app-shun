@@ -59,43 +59,9 @@ router.get('/add', (req, res, next) => {
 
 // 新規作成フォームの送信処理
 router.post('/add', (req, res, next) => {
-  // ('チェック項目', 'エラ-メッセージ')
-  req.check('name','NAME は必ず入力して下さい。').notEmpty();
-  req.check('mail','MAIL はメールアドレスを記入して下さい。').isEmail();
-  req.check('age', 'AGE は年齢（整数）を入力下さい。').isInt();
-
-  // バリデーションの結果を取得し非同期でバリデーション処理を実行しthenにコールバック関数を用意
-  req.getValidationResult().then((result) => {
-      // 受け取ったバリデーションが空でないならtrue（バリデーションのチェックに引っ掛かった場合）
-      if (!result.isEmpty()) {
-          var re = '<ul class="error">';
-          // 受け取ったエラーメッセージを配列として取り出す
-          var result_arr = result.array();
-          // 配列を変数 n　に取り出してエラーメッセージの表示を作成
-          for(var n in result_arr) {
-              re += '<li>' + result_arr[n].msg + '</li>'
-          }
-          re += '</ul>';
-          var data = {
-              title: 'Hello/Add',
-              content: re,
-              form: req.body
-          }
-          res.render('hello/add', data);
-      } else {
-          var nm = req.body.name;
-          var ml = req.body.mail;
-          var ag = req.body.age;
-          var data = {'name':nm, 'mail':ml, 'age':ag};
-          
-          var connection = mysql.createConnection(mysql_setting);
-          connection.connect();
-          connection.query('insert into mydata set ?', data, 
-                  function (error, results, fields) {
-              res.redirect('/hello');
-          });
-          connection.end();
-      }
+  var response = res;
+  new MyData(req.body).save().then((model) => {
+    response.redirect('/hello');
   });
 });
 
@@ -185,6 +151,34 @@ router.post('/delete',(req, res, next) => {
       res.redirect('/hello');
     });
     connection.end();
+});
+
+router.get('/find', (req, res, next) => {
+  var data = {
+    title: '/Hello/Find',
+    content: '検索IDを入力',
+    form: {fstr:''},
+    mydata:null
+  };
+  res.render('hello/find', data);
+
+});
+
+router.post('/find',(req, res, next) => {
+  // .where(項目名 , 比較する記号, 値) → req.body.fstrとidの値が等しいレコードだけが見つかる
+  new MyData().where('id', '=', req.body.fstr).fetch().then((collection) => {
+    var data = {
+      title: 'Hello',
+      content: '※id = ' + req.body.fstr + 'の検索結果:',
+      form: req.body,
+      mydata: collection
+    };
+    res.render('hello/find', data);
+    console.log(data);
+  })
+  .catch((err) => {
+    res.status(500).json({error: true, data: {message: err.message}});
+  });
 });
 
 module.exports = router;
